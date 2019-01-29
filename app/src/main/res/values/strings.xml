@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">SBAdminServer</string>
+    <string name="slogan">Desarrollo: Fernando Rowies fernandorowies.saxo@gmail.com 4282-3000 11-5849-8374</string>
+    <string name="please_waiting">Please waiting...</string>
+    <string name="title_activity_home">Home</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Android Studio</string>
+    <string name="nav_header_subtitle">android.studio@android.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
 </resources>
