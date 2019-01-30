@@ -12,15 +12,15 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/category_image"
+            android:id="@+id/product_image"
             android:scaleType="centerCrop"
             android:src="@drawable/background"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />
 
         <TextView
-            android:id="@+id/category_name"
-            android:text="Name of Category"
+            android:id="@+id/product_name"
+            android:text="Name of Product"
             android:textColor="@android:color/white"
             android:background="#4f0e0d0e"
             android:textSize="20sp"
