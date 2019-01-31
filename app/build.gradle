@@ -28,11 +28,13 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 
     //Firebase
-    implementation 'com.google.firebase:firebase-core:16.0.1'
-    implementation 'com.google.firebase:firebase-database:16.0.1'
+    implementation 'com.google.firebase:firebase-core:10.2.0'
+    implementation 'com.google.firebase:firebase-database:10.2.0'
     implementation 'com.firebaseui:firebase-ui-database:1.2.0'
-    implementation 'com.google.firebase:firebase-storage:16.0.1'
-    implementation 'com.google.firebase:firebase-auth:16.0.1'
+    implementation 'com.google.firebase:firebase-storage:10.2.0'
+    implementation 'com.google.firebase:firebase-auth:10.2.0'
+    implementation 'com.google.android.gms:play-services-maps:10.2.0'   //modified to match
+    implementation 'com.google.android.gms:play-services:10.2.0'        //for Location
 
     //replacement for Button info.hoang8f.widget.FButton deprecated
     implementation 'com.github.jd-alexander:android-flat-button:v1.1'
@@ -48,6 +50,9 @@ dependencies {
 
     //Spinner
     implementation 'com.jaredrummler:material-spinner:1.1.0'
+
+    //needed to use 10.2.0 instead of 16.0.2
+    implementation 'com.android.support:support-v4:28.0.0'
 
 }
 apply plugin: 'com.google.gms.google-services'
