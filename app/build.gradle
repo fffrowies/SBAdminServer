@@ -46,7 +46,8 @@ dependencies {
     //Picasso
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
-    //SpotsDialog in replacement for deprecated ProgressDialog
-    implementation 'com.github.d-max:spots-dialog:1.1@aar'
+    //Spinner
+    implementation 'com.jaredrummler:material-spinner:1.1.0'
+
 }
 apply plugin: 'com.google.gms.google-services'

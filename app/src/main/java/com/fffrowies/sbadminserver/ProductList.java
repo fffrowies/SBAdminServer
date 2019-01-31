@@ -38,7 +38,6 @@ import com.squareup.picasso.Picasso;
 
 import java.util.UUID;
 
-import dmax.dialog.SpotsDialog;
 import info.hoang8f.widget.FButton;
 
 public class ProductList extends AppCompatActivity {
