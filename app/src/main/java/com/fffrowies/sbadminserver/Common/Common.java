@@ -1,9 +1,12 @@
 package com.fffrowies.sbadminserver.Common;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 
 import com.fffrowies.sbadminserver.Model.Request;
 import com.fffrowies.sbadminserver.Model.User;
@@ -34,8 +37,7 @@ public class Common {
         return RetrofitClient.getClient(baseUrl).create(IGeoCoordinates.class);
     }
 
-    public static Bitmap scaleBitmap(Bitmap bitmap, int newWidth, int newHeight)
-    {
+    public static Bitmap scaleBitmap(Bitmap bitmap, int newWidth, int newHeight) {
         Bitmap scaledBitmap = Bitmap.createBitmap(newWidth, newHeight, Bitmap.Config.ARGB_8888);
 
         float scaleX = newWidth / (float) bitmap.getWidth();
@@ -52,5 +54,5 @@ public class Common {
         return scaledBitmap;
     }
 
-    public static final String APIKEY = "AIzaSyBIkuy6OufcIJLSivtVgxwxGZSknbOKxBg";
+    public static final String API_KEY = "AIzaSyBIkuy6OufcIJLSivtVgxwxGZSknbOKxBg";
 }

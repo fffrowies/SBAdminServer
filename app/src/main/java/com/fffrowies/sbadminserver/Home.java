@@ -1,5 +1,6 @@
 package com.fffrowies.sbadminserver;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -21,7 +22,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -68,9 +68,6 @@ public class Home extends AppCompatActivity
     Category newCategory;
 
     Uri saveUri;
-
-    ProgressBar progressBar;
-    TextView txvProgressBar;
 
     DrawerLayout drawer;
 
@@ -131,10 +128,6 @@ public class Home extends AppCompatActivity
         btnSelect = (FButton) add_category_layout.findViewById(R.id.btnSelect);
         btnUpload = (FButton) add_category_layout.findViewById(R.id.btnUpload);
 
-        progressBar = (ProgressBar) add_category_layout.findViewById(R.id.progressbar);
-        progressBar.setVisibility(View.INVISIBLE);
-        txvProgressBar = (TextView) add_category_layout.findViewById(R.id.txvProgressBar);
-
         //Event for buttons
         btnSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -161,7 +154,8 @@ public class Home extends AppCompatActivity
                 dialog.dismiss();
 
                 //Create new Category
-                if (newCategory != null) {
+                if (newCategory != null)
+                {
                     categories.push().setValue(newCategory);
                     Snackbar.make(drawer,"New category "+newCategory.getName()+" was added",Snackbar.LENGTH_SHORT).show();
                 }
@@ -179,9 +173,11 @@ public class Home extends AppCompatActivity
 
     private void uploadImage() {
 
-        if (saveUri != null) {
-            progressBar.setVisibility(View.VISIBLE);
-            txvProgressBar.setText("Uploading...");
+        if (saveUri != null)
+        {
+            final ProgressDialog mDialog = new ProgressDialog(Home.this);
+            mDialog.setMessage("Uploading...");
+            mDialog.show();
 
             String imageName = UUID.randomUUID().toString();
             final StorageReference imageFolder = storageReference.child("images/"+imageName);
@@ -189,9 +185,7 @@ public class Home extends AppCompatActivity
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
-
+                            mDialog.dismiss();
                             Toast.makeText(Home.this, "Uploaded!!!", Toast.LENGTH_SHORT).show();
 
                             imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -207,9 +201,7 @@ public class Home extends AppCompatActivity
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
-
+                            mDialog.dismiss();
                             Toast.makeText(Home.this, "ERROR " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     })
@@ -217,7 +209,7 @@ public class Home extends AppCompatActivity
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                            txvProgressBar.setText("Uploaded " + progress + "%");
+                            mDialog.setMessage("Uploaded " + progress + "%");
                         }
                     });
         }
@@ -226,8 +218,11 @@ public class Home extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Common.PICK_IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
+        if (requestCode == Common.PICK_IMAGE_REQUEST
+                && resultCode == RESULT_OK
+                && data != null
+                && data.getData() != null)
+        {
             saveUri = data.getData();
             btnSelect.setText("Image Selected!");
         }
@@ -273,9 +268,12 @@ public class Home extends AppCompatActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (drawer.isDrawerOpen(GravityCompat.START))
+        {
             drawer.closeDrawer(GravityCompat.START);
-        } else {
+        }
+        else
+        {
             super.onBackPressed();
         }
     }
@@ -299,7 +297,8 @@ public class Home extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_orders) {
+        if (id == R.id.nav_orders)
+        {
             Intent ordersIntent = new Intent(Home.this, OrderStatus.class);
             startActivity(ordersIntent);
         }
@@ -314,10 +313,12 @@ public class Home extends AppCompatActivity
     @Override
     public boolean onContextItemSelected(MenuItem item) {
 
-        if (item.getTitle().equals(Common.UPDATE)) {
+        if (item.getTitle().equals(Common.UPDATE))
+        {
             showUpdateDialog(adapter.getRef(item.getOrder()).getKey(), adapter.getItem(item.getOrder()));
         }
-        else if (item.getTitle().equals(Common.DELETE)) {
+        else if (item.getTitle().equals(Common.DELETE))
+        {
             deleteCategory(adapter.getRef(item.getOrder()).getKey());
         }
 
@@ -340,10 +341,6 @@ public class Home extends AppCompatActivity
         edtName = (MaterialEditText) add_category_layout.findViewById(R.id.edtName);
         btnSelect = (FButton) add_category_layout.findViewById(R.id.btnSelect);
         btnUpload = (FButton) add_category_layout.findViewById(R.id.btnUpload);
-
-        progressBar = (ProgressBar) add_category_layout.findViewById(R.id.progressbar);
-        progressBar.setVisibility(View.INVISIBLE);
-        txvProgressBar = (TextView) add_category_layout.findViewById(R.id.txvProgressBar);
 
         //Set default name
         edtName.setText(item.getName());
@@ -390,9 +387,11 @@ public class Home extends AppCompatActivity
 
     private void changeImage(final Category item) {
 
-        if (saveUri != null) {
-            progressBar.setVisibility(View.VISIBLE);
-            txvProgressBar.setText("Uploading...");
+        if (saveUri != null)
+        {
+            final ProgressDialog mDialog = new ProgressDialog(Home.this);
+            mDialog.setMessage("Uploading...");
+            mDialog.show();
 
             String imageName = UUID.randomUUID().toString();
             final StorageReference imageFolder = storageReference.child("images/"+imageName);
@@ -400,9 +399,7 @@ public class Home extends AppCompatActivity
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
-
+                            mDialog.dismiss();
                             Toast.makeText(Home.this, "Uploaded!!!", Toast.LENGTH_SHORT).show();
 
                             imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -418,9 +415,7 @@ public class Home extends AppCompatActivity
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
-
+                            mDialog.dismiss();
                             Toast.makeText(Home.this, "ERROR " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     })
@@ -428,7 +423,7 @@ public class Home extends AppCompatActivity
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                            txvProgressBar.setText("Uploaded " + progress + "%");
+                            mDialog.setMessage("Uploaded " + progress + "%");
                         }
                     });
         }

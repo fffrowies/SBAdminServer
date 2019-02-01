@@ -34,7 +34,8 @@ dependencies {
     implementation 'com.google.firebase:firebase-storage:10.2.0'
     implementation 'com.google.firebase:firebase-auth:10.2.0'
     implementation 'com.google.android.gms:play-services-maps:10.2.0'   //modified to match
-    implementation 'com.google.android.gms:play-services:10.2.0'        //for Location
+//    implementation 'com.google.android.gms:play-services:10.2.0'        //for Location
+    implementation 'com.google.android.gms:play-services-location:10.2.0'
 
     //replacement for Button info.hoang8f.widget.FButton deprecated
     implementation 'com.github.jd-alexander:android-flat-button:v1.1'

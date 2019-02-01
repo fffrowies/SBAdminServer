@@ -1,5 +1,6 @@
 package com.fffrowies.sbadminserver;
 
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,9 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fffrowies.sbadminserver.Common.Common;
@@ -66,9 +65,6 @@ public class ProductList extends AppCompatActivity {
     Product newProduct;
 
     Uri saveUri;
-
-    ProgressBar progressBar;
-    TextView txvProgressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -148,10 +144,6 @@ public class ProductList extends AppCompatActivity {
         btnSelect = (FButton) add_product_layout.findViewById(R.id.btnSelect);
         btnUpload = (FButton) add_product_layout.findViewById(R.id.btnUpload);
 
-        progressBar = (ProgressBar) add_product_layout.findViewById(R.id.progressbar);
-        progressBar.setVisibility(View.INVISIBLE);
-        txvProgressBar = (TextView) add_product_layout.findViewById(R.id.txvProgressBar);
-
         //Event for buttons
         btnSelect.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -178,7 +170,8 @@ public class ProductList extends AppCompatActivity {
                 dialog.dismiss();
 
                 //Create new Product
-                if (newProduct != null) {
+                if (newProduct != null)
+                {
                     productList.push().setValue(newProduct);
                     Snackbar.make(rootLayout,"New product "+newProduct.getName()+" was added",Snackbar.LENGTH_SHORT).show();
                 }
@@ -203,9 +196,11 @@ public class ProductList extends AppCompatActivity {
 
     private void uploadImage() {
 
-        if (saveUri != null) {
-            progressBar.setVisibility(View.VISIBLE);
-            txvProgressBar.setText("Uploading...");
+        if (saveUri != null)
+        {
+            final ProgressDialog mDialog = new ProgressDialog(ProductList.this);
+            mDialog.setMessage("Uploading...");
+            mDialog.show();
 
             String imageName = UUID.randomUUID().toString();
             final StorageReference imageFolder = storageReference.child("images/"+imageName);
@@ -213,9 +208,7 @@ public class ProductList extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
-
+                            mDialog.dismiss();
                             Toast.makeText(ProductList.this, "Uploaded!!!", Toast.LENGTH_SHORT).show();
 
                             imageFolder.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
@@ -236,9 +229,7 @@ public class ProductList extends AppCompatActivity {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
-
+                            mDialog.dismiss();
                             Toast.makeText(ProductList.this, "ERROR " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
                     })
@@ -246,7 +237,7 @@ public class ProductList extends AppCompatActivity {
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                            txvProgressBar.setText("Uploaded " + progress + "%");
+                            mDialog.setMessage("Uploaded " + progress + "%");
                         }
                     });
         }
@@ -255,8 +246,11 @@ public class ProductList extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Common.PICK_IMAGE_REQUEST && resultCode == RESULT_OK
-                && data != null && data.getData() != null) {
+        if (requestCode == Common.PICK_IMAGE_REQUEST
+                && resultCode == RESULT_OK
+                && data != null
+                && data.getData() != null)
+        {
             saveUri = data.getData();
             btnSelect.setText("Image Selected!");
         }
@@ -266,9 +260,12 @@ public class ProductList extends AppCompatActivity {
     @Override
     public boolean onContextItemSelected(MenuItem item) {
 
-        if (item.getTitle().equals(Common.UPDATE)) {
+        if (item.getTitle().equals(Common.UPDATE))
+        {
             showUpdateProductDialog(adapter.getRef(item.getOrder()).getKey(), adapter.getItem(item.getOrder()));
-        } else if (item.getTitle().equals(Common.DELETE)) {
+        }
+        else if (item.getTitle().equals(Common.DELETE))
+        {
             deleteProduct(adapter.getRef(item.getOrder()).getKey());
         }
 
@@ -300,10 +297,6 @@ public class ProductList extends AppCompatActivity {
 
         btnSelect = (FButton) add_product_layout.findViewById(R.id.btnSelect);
         btnUpload = (FButton) add_product_layout.findViewById(R.id.btnUpload);
-
-        progressBar = (ProgressBar) add_product_layout.findViewById(R.id.progressbar);
-        progressBar.setVisibility(View.INVISIBLE);
-        txvProgressBar = (TextView) add_product_layout.findViewById(R.id.txvProgressBar);
 
         //Event for buttons
         btnSelect.setOnClickListener(new View.OnClickListener() {
@@ -352,9 +345,11 @@ public class ProductList extends AppCompatActivity {
 
     private void changeImage(final Product item) {
 
-        if (saveUri != null) {
-            progressBar.setVisibility(View.VISIBLE);
-            txvProgressBar.setText("Uploading...");
+        if (saveUri != null)
+        {
+            final ProgressDialog mDialog = new ProgressDialog(ProductList.this);
+            mDialog.setMessage("Uploading...");
+            mDialog.show();
 
             String imageName = UUID.randomUUID().toString();
             final StorageReference imageFolder = storageReference.child("images/"+imageName);
@@ -362,8 +357,7 @@ public class ProductList extends AppCompatActivity {
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
+                            mDialog.dismiss();
 
                             Toast.makeText(ProductList.this, "Uploaded!!!", Toast.LENGTH_SHORT).show();
 
@@ -380,8 +374,7 @@ public class ProductList extends AppCompatActivity {
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
+                            mDialog.dismiss();
 
                             Toast.makeText(ProductList.this, "ERROR " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
@@ -390,7 +383,7 @@ public class ProductList extends AppCompatActivity {
                         @Override
                         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                             double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                            txvProgressBar.setText("Uploaded " + progress + "%");
+                            mDialog.setMessage("Uploaded " + progress + "%");
                         }
                     });
         }

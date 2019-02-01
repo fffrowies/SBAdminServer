@@ -1,5 +1,6 @@
 package com.fffrowies.sbadminserver;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -7,8 +8,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fffrowies.sbadminserver.Common.Common;
@@ -27,9 +26,6 @@ public class SignIn extends AppCompatActivity {
     EditText edtPhone, edtPassword;
     Button btnSignIn;
 
-    ProgressBar progressBar;
-    TextView txvProgressBar;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,10 +36,6 @@ public class SignIn extends AppCompatActivity {
 
         btnSignIn = (FButton) findViewById(R.id.btnSignIn);
 
-        progressBar = (ProgressBar) findViewById(R.id.progressbar);
-        progressBar.setVisibility(View.INVISIBLE);
-        txvProgressBar = (TextView) findViewById(R.id.txvProgressBar);
-
         //Init Firebase
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         final DatabaseReference table_user = database.getReference("User");
@@ -53,8 +45,9 @@ public class SignIn extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                progressBar.setVisibility(View.VISIBLE);
-                txvProgressBar.setText("Please waiting...");
+                final ProgressDialog mDialog = new ProgressDialog(SignIn.this);
+                mDialog.setMessage("Please waiting...");
+                mDialog.show();
 
                 table_user.addValueEventListener(new ValueEventListener() {
 
@@ -62,35 +55,36 @@ public class SignIn extends AppCompatActivity {
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                         //Check if user exists in database
-                        if (dataSnapshot.child(edtPhone.getText().toString()).exists()) {
-
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
+                        if (dataSnapshot.child(edtPhone.getText().toString()).exists())
+                        {
+                            mDialog.dismiss();
 
                             //Get user information
                             User user = dataSnapshot.child(edtPhone.getText().toString()).getValue(User.class);
                             user.setPhone(edtPhone.getText().toString());
-                            if (Boolean.parseBoolean(user.getIsStaff())) {
-                                if (user.getPassword().equals(edtPassword.getText().toString())) {
+                            if (Boolean.parseBoolean(user.getIsStaff()))
+                            {
+                                if (user.getPassword().equals(edtPassword.getText().toString()))
+                                {
                                     Toast.makeText(SignIn.this, "OK. We're in !!!", Toast.LENGTH_SHORT).show();
                                     Intent homeIntent = new Intent(SignIn.this, Home.class);
                                     Common.currentUser = user;
                                     startActivity(homeIntent);
                                     finish();
                                 }
-                                else {
+                                else
+                                {
                                     Toast.makeText(SignIn.this, "Wrong Password !!!", Toast.LENGTH_SHORT).show();
                                 }
                             }
-                            else {
+                            else
+                            {
                                 Toast.makeText(SignIn.this, "Staff account required", Toast.LENGTH_SHORT).show();
                             }
                         }
-                        else {
-
-                            progressBar.setVisibility(View.INVISIBLE);
-                            txvProgressBar.setText("");
-
+                        else
+                        {
+                            mDialog.dismiss();
                             Toast.makeText(SignIn.this, "User not exist in Database", Toast.LENGTH_SHORT).show();
                         }
                     }

@@ -133,7 +133,7 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
 
     private void drawRoute(final LatLng yourLocation, String address) {
 
-        mService.getGeoCode(address,Common.APIKEY).enqueue(new Callback<String>() {
+        mService.getGeoCode(address,Common.API_KEY).enqueue(new Callback<String>() {
 
             @Override
             public void onResponse(Call<String> call, Response<String> response) {
@@ -166,7 +166,7 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
 
                     //draw route
                     mService.getDirections(yourLocation.latitude + "," + yourLocation.longitude,
-                            orderLocation.latitude + "," + orderLocation.longitude, Common.APIKEY)
+                            orderLocation.latitude + "," + orderLocation.longitude, Common.API_KEY)
                             .enqueue(new Callback<String>() {
                                 @Override
                                 public void onResponse(Call<String> call, Response<String> response) {
