@@ -1,15 +1,24 @@
 package com.fffrowies.sbadminserver;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.fffrowies.sbadminserver.Common.Common;
+import com.fffrowies.sbadminserver.Common.DirectionJSONParser;
+import com.fffrowies.sbadminserver.Remote.IGeoCoordinates;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -20,8 +29,22 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class TrackingOrder extends FragmentActivity implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
@@ -42,11 +65,14 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
     private static int FASTEST_INTERVAL = 5000;
     private static int DISPLACEMENT = 10;
 
+    private IGeoCoordinates mService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tracking_order);
+
+        mService = Common.getGeoCodeService();
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED &&
@@ -92,16 +118,78 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
                 LatLng yourLocation = new LatLng(latitude, logitude);
                 mMap.addMarker(new MarkerOptions().position(yourLocation).title("Your Location"));
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(yourLocation));
-                mMap.animateCamera(CameraUpdateFactory.zoomTo(17.0f));
+                mMap.animateCamera(CameraUpdateFactory.zoomTo(16.0f));
 
-
+                //After add Marker for your location, add Marker for this Order and draw route
+                drawRoute(yourLocation, Common.currentRequest.getAddress());
             }
             else
             {
-                Toast.makeText(this, "Couldn't get the location", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(this, "Couldn't get the location", Toast.LENGTH_SHORT).show();
+                Log.d("DEBUG","Couldn't get the location");
             }
         }
+    }
 
+    private void drawRoute(final LatLng yourLocation, String address) {
+
+        mService.getGeoCode(address,Common.APIKEY).enqueue(new Callback<String>() {
+
+            @Override
+            public void onResponse(Call<String> call, Response<String> response) {
+
+                try
+                {
+                    JSONObject jsonObject = new JSONObject(response.body().toString());
+
+                    String lat = ((JSONArray) jsonObject.get("results"))
+                            .getJSONObject(0)
+                            .getJSONObject("geometry")
+                            .getJSONObject("location")
+                            .get("lat").toString();
+
+                    String lng = ((JSONArray) jsonObject.get("results"))
+                            .getJSONObject(0)
+                            .getJSONObject("geometry")
+                            .getJSONObject("location")
+                            .get("lng").toString();
+
+                    LatLng orderLocation = new LatLng(Double.parseDouble(lat), Double.parseDouble(lng));
+
+                    Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.box);
+                    bitmap = Common.scaleBitmap(bitmap, 50, 50);
+
+                    MarkerOptions marker = new MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(bitmap))
+                            .title("Order of " + Common.currentRequest.getPhone())
+                            .position(orderLocation);
+                    mMap.addMarker(marker);
+
+                    //draw route
+                    mService.getDirections(yourLocation.latitude + "," + yourLocation.longitude,
+                            orderLocation.latitude + "," + orderLocation.longitude, Common.APIKEY)
+                            .enqueue(new Callback<String>() {
+                                @Override
+                                public void onResponse(Call<String> call, Response<String> response) {
+                                    new ParserTask().execute(response.body().toString());
+                                }
+
+                                @Override
+                                public void onFailure(Call<String> call, Throwable t) {
+
+                                }
+                            });
+                }
+                catch (JSONException e)
+                {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<String> call, Throwable t) {
+
+            }
+        });
     }
 
     private void createLocationRequest() {
@@ -212,6 +300,68 @@ public class TrackingOrder extends FragmentActivity implements OnMapReadyCallbac
         super.onStart();
         if (mGoogleApiClient != null)
             mGoogleApiClient.connect();
+    }
 
+    private class ParserTask extends AsyncTask<String, Integer, List<List<HashMap<String, String>>>> {
+
+        ProgressDialog mDialog = new ProgressDialog(TrackingOrder.this);
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mDialog.setMessage("Please waiting...");
+            mDialog.show();
+        }
+
+        @Override
+        protected List<List<HashMap<String, String>>> doInBackground(String... strings) {
+            JSONObject jObject;
+            List<List<HashMap<String, String>>> routes = null;
+            try
+            {
+                jObject = new JSONObject(strings[0]);
+                DirectionJSONParser parser = new DirectionJSONParser();
+
+                routes = parser.parse(jObject);
+            }
+            catch (JSONException e)
+            {
+                e.printStackTrace();
+            }
+            return routes;
+        }
+
+        @Override
+        protected void onPostExecute(List<List<HashMap<String, String>>> lists) {
+            mDialog.dismiss();
+
+            ArrayList points = null;
+            PolylineOptions lineOptions = null;
+
+            for (int i = 0; i < lists.size(); i++)
+            {
+                points = new ArrayList();
+                lineOptions = new PolylineOptions();
+
+                List<HashMap<String, String>> path = lists.get(i);
+
+                for (int j = 0; j < path.size(); j++)
+                {
+                    HashMap<String, String> point = path.get(j);
+
+                    double lat = Double.parseDouble(point.get("lat"));
+                    double lng = Double.parseDouble(point.get("lng"));
+                    LatLng position = new LatLng(lat, lng);
+
+                    points.add(position);
+                }
+
+                lineOptions.addAll(points);
+                lineOptions.width(6);
+                lineOptions.color(Color.BLUE);
+                lineOptions.geodesic(true);
+            }
+            mMap.addPolyline(lineOptions);
+        }
     }
 }
