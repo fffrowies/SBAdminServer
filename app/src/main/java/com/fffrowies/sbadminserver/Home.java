@@ -28,7 +28,7 @@ import android.widget.Toast;
 import com.fffrowies.sbadminserver.Common.Common;
 import com.fffrowies.sbadminserver.Interface.ItemClickListener;
 import com.fffrowies.sbadminserver.Model.Category;
-import com.fffrowies.sbadminserver.Service.ListenOrder;
+import com.fffrowies.sbadminserver.Model.Token;
 import com.fffrowies.sbadminserver.ViewHolder.CategoryViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -39,6 +39,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -120,9 +121,15 @@ public class Home extends AppCompatActivity
 
         loadCategory();
 
-        //Call Service
-        Intent service = new Intent(Home.this, ListenOrder.class);
-        startService(service);
+        //Send token
+        updateToken(FirebaseInstanceId.getInstance().getToken());
+    }
+
+    private void updateToken(String token) {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        DatabaseReference tokens = db.getReference("Tokens");
+        Token data = new Token(token, true);     //true because this token is from Server
+        tokens.child(Common.currentUser.getPhone()).setValue(data);
     }
 
     private void showDialog() {

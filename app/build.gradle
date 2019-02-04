@@ -36,20 +36,13 @@ dependencies {
     implementation 'com.google.android.gms:play-services-maps:10.2.0'   //modified to match
 //    implementation 'com.google.android.gms:play-services:10.2.0'        //for Location
     implementation 'com.google.android.gms:play-services-location:10.2.0'
+    implementation 'com.google.firebase:firebase-messaging:10.2.1'
 
     //replacement for Button info.hoang8f.widget.FButton deprecated
     implementation 'com.github.jd-alexander:android-flat-button:v1.1'
-
-    //Material EditText
     implementation 'com.rengwuxian.materialedittext:library:2.1.4'
-
-    //CardView
     implementation 'com.android.support:cardview-v7:28.0.0'
-
-    //Picasso
     implementation 'com.squareup.picasso:picasso:2.5.2'
-
-    //Spinner
     implementation 'com.jaredrummler:material-spinner:1.1.0'
 
     //needed to use 10.2.0 instead of 16.0.2
@@ -58,6 +51,7 @@ dependencies {
     //Retrofit to HTTP Client
     implementation 'com.squareup.retrofit2:retrofit:2.3.0'
     implementation 'com.squareup.retrofit2:converter-scalars:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
 
 }
 apply plugin: 'com.google.gms.google-services'
