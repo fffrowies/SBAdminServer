@@ -28,12 +28,17 @@ import android.widget.Toast;
 import com.fffrowies.sbadminserver.Common.Common;
 import com.fffrowies.sbadminserver.Interface.ItemClickListener;
 import com.fffrowies.sbadminserver.Model.Category;
+import com.fffrowies.sbadminserver.Service.ListenOrder;
 import com.fffrowies.sbadminserver.ViewHolder.CategoryViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -114,6 +119,10 @@ public class Home extends AppCompatActivity
         recycler_category.setLayoutManager(layoutManager);
 
         loadCategory();
+
+        //Call Service
+        Intent service = new Intent(Home.this, ListenOrder.class);
+        startService(service);
     }
 
     private void showDialog() {
@@ -301,6 +310,11 @@ public class Home extends AppCompatActivity
         {
             Intent ordersIntent = new Intent(Home.this, OrderStatus.class);
             startActivity(ordersIntent);
+        } else if (id == R.id.nav_log_out) {
+            //Logout
+            Intent signInIntent = new Intent(Home.this, SignIn.class);
+            signInIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(signInIntent);
         }
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -326,6 +340,23 @@ public class Home extends AppCompatActivity
     }
 
     private void deleteCategory(String key) {
+        DatabaseReference products = database.getReference("Products");
+        Query productsInCategory = products.orderByChild("categoryId").equalTo(key);
+        productsInCategory.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot:dataSnapshot.getChildren())
+                {
+                    postSnapshot.getRef().removeValue();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         categories.child(key).removeValue();
         Toast.makeText(this, "Item deleted !!!!", Toast.LENGTH_SHORT).show();
     }
